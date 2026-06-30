@@ -3,27 +3,9 @@
 #include <avr/io.h>
 #include "lcd_control.h"
 #include <util/delay.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
 
-/*
-    //inicjowanie pinow portow podlaczonych do wyswielacza
-    //ustawienie wszystkich jako wyjscia
-    DDR(LCD_D7PORT) |= (1<<LCD_D7);
-    DDR(LCD_D6PORT) |= (1<<LCD_D6);
-    DDR(LCD_D5PORT) |= (1<<LCD_D5);
-    DDR(LCD_D4PORT) |= (1<<LCD_D4);
-    DDR(LCD_RSPORT) |= (1<<LCD_RS);
-    DDR(LCD_EPORT) |= (1<<LCD_E);
-    #if USE_RW == 1
-    DDR(LCD_RWPORT) |= (1<<LCD_RW);
-    #endif
-
-    //domyslne wyzerowanie wszystkich linii sterujacych na starcie
-    PORT(LCD_RSPORT) &= ~(1<<LCD_RS);
-    PORT(LCD_EPORT) &= ~(1<<LCD_E);
-    #if USE_RW == 1
-    PORT(LCD_RWPORT) &= ~(1<<LCD_RW);
-    #endif
-*/
 
 static inline void data_dir_in()
 {
@@ -303,8 +285,114 @@ void lcd_blink_off(void)
 //wyswietlenie napisu zdefiniowanego w RAM
 void lcd_str(char* str)
 {
-    while(*str)
+    register char znak;
+    while(znak =* (str++))
     {
-        lcd_write_data(*str++);
+        lcd_write_data((znak>= 0x80 && znak <= 0x87) ? (znak & 0x07) : znak);
     }
 }
+
+//odczyt znaku z pamieci FLASH
+#if USE_LCD_STR_P == 1
+void lcd_str_P(char* str)
+{
+    register char znak;
+    while((znak = pgm_read_byte(str++)))
+    {
+        //jesli kod zawiera sie pomiedzy 0x80 a 0x87 to maskujmey 5 starszych bitow wartoscia 0x07
+        lcd_write_data((znak>= 0x80 && znak <= 0x87) ? (znak & 0x07) : znak);
+    }
+}
+#endif
+
+//odczyt znaku z pamieci EEPROM
+#if USE_LCD_STR_E == 1
+void lcd_str_E(char* str)
+{
+    register char znak;
+    while(1)
+    {
+        znak = eeprom_read_byte((uint8_t *) (str++));
+        if(!znak || znak==0xff)
+        {
+            break;  //jesli znak jest 0 (0xff) to kocznymy wpisywanie
+        }
+        else
+        {
+            //jesli kod zawiera sie pomiedzy 0x80 a 0x87 to maskujmey 5 starszych bitow wartoscia 0x07
+            lcd_write_data((znak>= 0x80 && znak <= 0x87) ? (znak & 0x07) : znak);
+        }
+
+    }
+}
+#endif
+
+
+//wyswietlanie liczb calkowitych na wyswietlaczu
+#if USE_LCD_INT == 1
+void lcd_int(int val)
+{
+    //bufor musi byc nieduzy bo tworzy sie na stosie
+    char bufor[17];
+    //itoa() zwraca jako rezultat adres pierwszego el tablicy po konwersji z bufora
+    lcd_str(itoa(val, bufor, 10));
+}
+#endif
+
+#if USE_LCD_HEX == 1
+void lcd_hex(int val)
+{
+    //bufor musi byc nieduzy bo tworzy sie na stosie
+    char bufor(17);
+    //itoa() zwraca jako rezultat adres pierwszego el tablicy po konwersji z bufora
+    lcd_str(itoa(val, bufor, 16));
+}
+#endif
+
+//funckja sluzaca definicji wlasnego znaku na LCD z pamieci RAM
+#if USE_LCD_DEFCHAR == 1
+//args: nr - kod znaku w pamieci CGRAM 0x80-0x87
+// *def_znak - wskaznik do tablicy 7 bajtow definicujacych znak
+void lcd_defchar(uint8_t nr, uint8_t* def_znak)
+{
+    register uint8_t i, c;
+    lcd_write_cmd( 64+((nr&0x07)*8) );
+    for(i = 0; i<8; i++)
+    {
+        c = *(def_znak++);
+        lcd_write_data(c);
+    }
+}
+#endif;
+
+//funckja sluzaca definicji wlasnego znaku na LCD z pamieci FLASH
+#if USE_LCD_DEFCHAR_P == 1
+//args: nr - kod znaku w pamieci CGRAM 0x80-0x87
+// *def_znak - wskaznik do tablicy 7 bajtow definicujacych znak
+void lcd_defchar_P(uint8_t nr, uint8_t* def_znak)
+{
+    register uint8_t i, c;
+    lcd_write_cmd( 64+((nr&0x07)*8) );
+    for(i = 0; i<8; i++)
+    {
+        c = pgm_read_byte(def_znak++);
+        lcd_write_data(c);
+    }
+}
+#endif;
+
+//funckja sluzaca definicji wlasnego znaku na LCD z pamieci EEPROM
+#if USE_LCD_DEFCHAR_E == 1
+//args: nr - kod znaku w pamieci CGRAM 0x80-0x87
+// *def_znak - wskaznik do tablicy 7 bajtow definicujacych znak
+void lcd_defchar_E(uint8_t nr, uint8_t* def_znak)
+{
+    register uint8_t i, c;
+    lcd_write_cmd( 64+((nr&0x07)*8) );
+    for(i = 0; i<8; i++)
+    {
+        c = eeprom_read_byte(def_znak++);
+        lcd_write_data(c);
+    }
+}
+#endif;

@@ -51,6 +51,8 @@
 //void lcd_init(void);
 void lcd_init(void);
 void lcd_str(char* str);
+void lcd_str_E(char* str);
+void lcd_str_P(char* str);
 void lcd_cls(void);
 void lcd_write_cmd(uint8_t cmd);
 void lcd_write_data(uint8_t data);
@@ -136,7 +138,7 @@ void lcd_write_data(uint8_t data);
 #define USE_LCD_STR_P 0
 
 //wysyla string umieszczony w pamieci EEPROM
-#define USE_LCD_STR_E
+#define USE_LCD_STR_E 0
 
 //wyswietla liczbe dziesietna na LCD
 #define USE_LCD_INT 0

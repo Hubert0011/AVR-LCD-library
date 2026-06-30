@@ -3,6 +3,8 @@
 #include <avr/io.h>
 #include "lcd_control.h"
 #include <util/delay.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
 
 
 int main(void){
@@ -30,32 +32,12 @@ int main(void){
     PORT(LCD_RWPORT) &= ~(1<<LCD_RW);
     #endif
 
-    //char tab[10] = "test";
-    lcd_init();
-    lcd_str("start");
 
-    //dodano nowy komentarz
-    DDRD |= (1<<PD5);
+    //wyswietlanie napisu
+    lcd_init();
+    
     while(1)
     {
-        PORTD ^= (1<<PD5);
-        lcd_cls();
-        lcd_str("czesc");
-        _delay_ms(1500);
-        lcd_cls();
-        lcd_str("czy");
-        _delay_ms(1500);
-        lcd_cls();
-        lcd_str("dasz sie");
-        _delay_ms(1500);
-        lcd_cls();
-        lcd_str("zaprosic");
-        _delay_ms(1500);
-        lcd_cls();
-        lcd_str("na maly trip");
-        _delay_ms(1500);
-        lcd_cls();
-        lcd_str("w czwartek?");
-        _delay_ms(1500);
+        
     }
 }
