@@ -34,7 +34,7 @@ int main(void){
     lcd_init();
     lcd_str("start");
 
-
+    //dodano nowy komentarz
     DDRD |= (1<<PD5);
     while(1)
     {
