@@ -355,15 +355,18 @@ void lcd_hex(int val)
 // *def_znak - wskaznik do tablicy 7 bajtow definicujacych znak
 void lcd_defchar(uint8_t nr, uint8_t* def_znak)
 {
-    register uint8_t i, c;
-    lcd_write_cmd( 64+((nr&0x07)*8) );
+    register uint8_t i, c, cgram_address;
+    cgram_address = 64+(nr*8);
+    lcd_write_cmd(cgram_address);
+    _delay_us(50);
     for(i = 0; i<8; i++)
     {
         c = *(def_znak++);
         lcd_write_data(c);
     }
+    lcd_cls();
 }
-#endif;
+#endif
 
 //funckja sluzaca definicji wlasnego znaku na LCD z pamieci FLASH
 #if USE_LCD_DEFCHAR_P == 1
@@ -378,8 +381,9 @@ void lcd_defchar_P(uint8_t nr, uint8_t* def_znak)
         c = pgm_read_byte(def_znak++);
         lcd_write_data(c);
     }
+    lcd_cls();
 }
-#endif;
+#endif
 
 //funckja sluzaca definicji wlasnego znaku na LCD z pamieci EEPROM
 #if USE_LCD_DEFCHAR_E == 1
@@ -394,5 +398,28 @@ void lcd_defchar_E(uint8_t nr, uint8_t* def_znak)
         c = eeprom_read_byte(def_znak++);
         lcd_write_data(c);
     }
+    lcd_cls();
 }
-#endif;
+#endif
+
+
+#if USE_LCD_LOCATE == 1
+void lcd_locate(uint8_t y, uint8_t x)
+{
+    switch(y)
+    {
+        case 0: y = LCD_LINE1; break;
+        #if (LCD_Y > 1)
+        case 1: y = LCD_LINE2; break;
+        #endif
+        #if (LCD_Y > 2)
+        case 2: y = LCD_LINE3; break;
+        #endif
+        #if (LCD_Y > 3)
+        case 3: y = LCD_LINE4; break;
+        #endif
+    }
+
+    lcd_write_cmd((0x80+y+x));
+}
+#endif

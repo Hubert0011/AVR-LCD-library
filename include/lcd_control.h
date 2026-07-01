@@ -135,19 +135,19 @@ void lcd_write_data(uint8_t data);
 #define USE_LCD_LOCATE 1 
 
 //wysyla string umieszczony w pamieci flash
-#define USE_LCD_STR_P 0
+#define USE_LCD_STR_P 1
 
 //wysyla string umieszczony w pamieci EEPROM
 #define USE_LCD_STR_E 0
 
 //wyswietla liczbe dziesietna na LCD
-#define USE_LCD_INT 0
+#define USE_LCD_INT 1
 
 //wyswietla liczbe szesntastkowa na LCD
 #define USE_LCD_HEX 0
 
 //wysyla zdefiniowany znak z pamieci RAM
-#define USE_LCD_DEFCHAR 0
+#define USE_LCD_DEFCHAR 1
 //wysyla zdefiniowany znak z pamieci FLASH
 #define USE_LCD_DEFCHAR_P 0
 //wysyla zdefiniowany znak z pamieci EEPROM
